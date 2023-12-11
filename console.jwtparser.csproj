@@ -9,6 +9,11 @@
     <ToolCommandName>jwtconsole</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Authors>John McBride</Authors>
+    <PackageProjectUrl>https://github.com/johnmcbride/console.jwtparser</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>JWT console parser .NET Global tool</PackageDescription>
+    <RepositoryUrl>https://github.com/johnmcbride/console.jwtparser</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
