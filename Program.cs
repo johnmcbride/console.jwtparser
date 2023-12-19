@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -56,8 +57,9 @@ public class ExtractCommand : Command<ExtractCommand.ExtractSettings>
         }
         
         //get the header and payload objects from the token
-        var jwtHeader = token.EncodedHeader;
-        var jwtPayload = token.EncodedPayload;
+        var jwtHeader = FixInvalidCharacters(token.EncodedHeader);
+        var jwtPayload = FixInvalidCharacters(token.EncodedPayload);
+        var jwtSignature = FixInvalidCharacters(token.RawSignature);
 
         //decode base64 encoded header
         //check for valid b64
@@ -67,8 +69,9 @@ public class ExtractCommand : Command<ExtractCommand.ExtractSettings>
             AnsiConsole.MarkupLine($"[red]Invalid Base64 (HEADER). Trying to add padding[/]");
             //try and add padding to base64 string (==) length/divisible by 4
             jwtHeader = PadBase64String(jwtHeader);
+            AnsiConsole.MarkupLine($"[yellow]Updated (PAYLOAD - padded).[/]");
         }
-        var decodedHeaderBytes = Convert.FromBase64String(token.EncodedHeader);
+        var decodedHeaderBytes = Convert.FromBase64String(jwtHeader);
         string decodedHeader = System.Text.Encoding.UTF8.GetString(decodedHeaderBytes);
 
         //print token header info
@@ -127,9 +130,21 @@ public class ExtractCommand : Command<ExtractCommand.ExtractSettings>
             return false;
         }
     }
+    public string FixInvalidCharacters(string Base64Item)
+    {
+        var b64 = Base64Item.Replace("_","/")
+            .Replace("-","+");
+        
+        return b64;
+    }
     public string PadBase64String(string Base64Item)
     {
+        //get the remainder left from mod...
         var numberToAdd = Base64Item.Length % 4;
+        //if remainder if greater that two, subtract two as we can
+        //only add two padding characters
+        numberToAdd = numberToAdd <= 2 ? numberToAdd : numberToAdd - 2;
+        //add any padding characters
         Base64Item += new string('=',numberToAdd);
 
         return Base64Item;
